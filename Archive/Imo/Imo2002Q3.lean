@@ -33,11 +33,6 @@ as the only solution.
 
 open Polynomial
 
-lemma Int.norm_lt_one_iff_eq_zero {z : ℤ} : ‖z‖ < 1 ↔ z = 0 := by
-  rw [Int.norm_eq_abs, abs_lt, show (-1 : ℝ) = (-1 : ℤ) by norm_num, Int.cast_lt,
-    show (1 : ℝ) = (1 : ℤ) by norm_num, Int.cast_lt]
-  lia
-
 namespace Imo2002Q3
 
 variable {m n : ℕ} (hm : 3 ≤ m) (hn : 3 ≤ n)
@@ -126,7 +121,9 @@ lemma dvd_of_hyp (h : {a : ℤ | 0 < a ∧ a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1}.
       _ = _ := by
         rw [eval_add, eval_mul, Int.cast_add, Int.cast_mul, add_div, mul_div_cancel_left₀ _ hZ₂]
   rw [← sub_eq_iff_eq_add', ← Int.cast_sub] at key
-  rw [← key, dist_zero_right, Int.norm_cast_real, Int.norm_lt_one_iff_eq_zero] at hZ₁
+  rw [← key, dist_zero_right, Real.norm_eq_abs] at hZ₁
+  norm_cast at hZ₁
+  rw [Int.abs_lt_one_iff] at hZ₁
   rw [hZ₁, Int.cast_zero] at key
   exact (div_ne_zero hZ₃ hZ₂).symm key
 
