@@ -38,32 +38,32 @@ namespace Imo2002Q3
 variable {m n : ℕ} (hm : 3 ≤ m) (hn : 3 ≤ n)
 
 include hm in
-lemma natDegree_numerpol : (X ^ m + X - C (1 : ℤ)).natDegree = m := by
+lemma natDegree_numerpol : ((X : ℤ[X]) ^ m + X - 1).natDegree = m := by
   compute_degree <;> grind
 
 include hm in
-lemma monic_numerpol : (X ^ m + X - C (1 : ℤ)).Monic := by
+lemma monic_numerpol : ((X : ℤ[X]) ^ m + X - 1).Monic := by
   apply Monic.sub_of_left
   · apply monic_X_pow_add
     rw [degree_X, Nat.one_lt_cast]
     lia
-  · rw [eq_intCast, Int.cast_one, degree_one, degree_add_eq_left_of_degree_lt]
+  · rw [degree_one, degree_add_eq_left_of_degree_lt]
     · simp_rw [degree_X_pow, Nat.cast_pos]
       lia
     · rw [degree_X_pow, degree_X, Nat.one_lt_cast]
       lia
 
 include hn in
-lemma natDegree_denompol : (X ^ n + X ^ 2 - C (1 : ℤ)).natDegree = n := by
+lemma natDegree_denompol : ((X : ℤ[X]) ^ n + X ^ 2 - 1).natDegree = n := by
   compute_degree <;> grind
 
 include hn in
-lemma monic_denompol : (X ^ n + X ^ 2 - C (1 : ℤ)).Monic := by
+lemma monic_denompol : ((X : ℤ[X]) ^ n + X ^ 2 - 1).Monic := by
   apply Monic.sub_of_left
   · apply monic_X_pow_add
     rw [degree_X_pow, Nat.cast_lt]
     lia
-  · rw [eq_intCast, Int.cast_one, degree_one, degree_add_eq_left_of_degree_lt]
+  · rw [degree_one, degree_add_eq_left_of_degree_lt]
     · simp_rw [degree_X_pow, Nat.cast_pos]
       lia
     · simp_rw [degree_X_pow, Nat.cast_lt]
@@ -72,9 +72,9 @@ lemma monic_denompol : (X ^ n + X ^ 2 - C (1 : ℤ)).Monic := by
 include hn in
 /-- The given condition implies `x ^ n + x ^ 2 - 1 ∣ x ^ m + x - 1` as polynomials. -/
 lemma dvd_of_hyp (h : {a : ℤ | 0 < a ∧ a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1}.Infinite) :
-    X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ m + X - C 1 := by
-  set F := X ^ m + X - C (1 : ℤ)
-  set G := X ^ n + X ^ 2 - C (1 : ℤ)
+    (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1 := by
+  set F := (X : ℤ[X]) ^ m + X - 1
+  set G := (X : ℤ[X]) ^ n + X ^ 2 - 1
   have monG : G.Monic := monic_denompol hn
   rw [← modByMonic_eq_zero_iff_dvd monG]
   contrapose! h
@@ -129,40 +129,37 @@ lemma dvd_of_hyp (h : {a : ℤ | 0 < a ∧ a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1}.
 
 include hn in
 lemma exists_root_denompol :
-    ∃ r ∈ Set.Ioo (0 : ℝ) 1, ((X ^ n + X ^ 2 - C (1 : ℤ)).map (Int.castRingHom ℝ)).eval r = 0 := by
-  simp only [eq_intCast, Int.cast_one, Polynomial.map_sub, Polynomial.map_add,
-    Polynomial.map_pow, map_X, Polynomial.map_one, eval_sub, eval_add, eval_pow, eval_X, eval_one]
+    ∃ r ∈ Set.Ioo (0 : ℝ) 1, (((X : ℤ[X]) ^ n + X ^ 2 - 1).map (Int.castRingHom ℝ)).eval r = 0 := by
+  simp only [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_pow, map_X, Polynomial.map_one,
+    eval_sub, eval_add, eval_pow, eval_X, eval_one]
   let f (r : ℝ) := r ^ n + r ^ 2 - 1
   have cf : ContinuousOn f (Set.Icc 0 1) := by fun_prop
   have ivt := intermediate_value_Ioo zero_le_one cf
   simp only [ne_eq, show n ≠ 0 by lia, not_false_eq_true, zero_pow, OfNat.ofNat_ne_zero, add_zero,
     zero_sub, one_pow, add_sub_cancel_right, f] at ivt
-  have zeromem : 0 ∈ Set.Ioo (-1 : ℝ) 1 := by simp
-  specialize ivt zeromem
-  rwa [Set.mem_image] at ivt
+  simpa [Set.mem_image] using ivt (by simp)
 
 /-- A root of `x ^ n + x ^ 2 - 1` obtained from `exists_root_denompol`. -/
 noncomputable def r₀ : ℝ :=
   (exists_root_denompol hn).choose
 
 lemma r₀_spec : r₀ hn ∈ Set.Ioo (0 : ℝ) 1 ∧
-    ((X ^ n + X ^ 2 - C (1 : ℤ)).map (Int.castRingHom ℝ)).IsRoot (r₀ hn) :=
+    (((X : ℤ[X]) ^ n + X ^ 2 - 1).map (Int.castRingHom ℝ)).IsRoot (r₀ hn) :=
   (exists_root_denompol hn).choose_spec
 
-lemma r₀_spec' (h : X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ m + X - C 1) :
-    ((X ^ m + X - C (1 : ℤ)).map (Int.castRingHom ℝ)).IsRoot (r₀ hn) := by
+lemma r₀_spec' (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) :
+    (((X : ℤ[X]) ^ m + X - 1).map (Int.castRingHom ℝ)).IsRoot (r₀ hn) := by
   rw [← map_dvd_map _ (Int.castRingHom ℝ).injective_int (monic_denompol hn)] at h
   exact (r₀_spec hn).2.dvd h
 
 include hn in
-lemma m_lt_twice_n (h : X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ m + X - C 1) : m < 2 * n := by
+lemma m_lt_twice_n (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) : m < 2 * n := by
   by_contra! hm
   obtain ⟨rb, rpoln⟩ := r₀_spec hn
   have rpolm := r₀_spec' hn h
   set r := r₀ hn
-  simp only [eq_intCast, Int.cast_one, Polynomial.map_sub, Polynomial.map_add, Polynomial.map_pow,
-    map_X, Polynomial.map_one, IsRoot.def, eval_sub, eval_add, eval_pow, eval_X, Set.mem_Ioo,
-    eval_one] at rpolm rpoln rb
+  simp only [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_pow, map_X, Polynomial.map_one,
+    IsRoot.def, eval_sub, eval_add, eval_pow, eval_X, Set.mem_Ioo, eval_one] at rpolm rpoln rb
   have key : 1 - r ≤ (1 - r ^ 2) ^ 2 := by
     calc
       _ = r ^ m := by linarith only [rpolm]
@@ -181,14 +178,14 @@ lemma m_lt_twice_n (h : X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ m + X - C 1) : m < 2
   exact pow_lt_pow_right_of_lt_one₀ rb.1 rb.2 (by lia)
 
 include hm hn in
-lemma n_lt_m (h : X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ m + X - C 1) : n < m := by
+lemma n_lt_m (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) : n < m := by
   have nlem := natDegree_le_of_dvd h (monic_numerpol hm).ne_zero
   rw [natDegree_numerpol hm, natDegree_denompol hn] at nlem
   apply lt_of_le_of_ne nlem
   by_contra h'
   subst h'
   rw [← dvd_sub_self_left,
-    show X ^ n + X ^ 2 - C (1 : ℤ) - (X ^ n + X - C 1) = X ^ 2 - X by ring] at h
+    show (X : ℤ[X]) ^ n + X ^ 2 - 1 - (X ^ n + X - 1) = X ^ 2 - X by ring] at h
   have subn0 : X ^ 2 - X ≠ (0 : Polynomial ℤ) := by
     rw [sq, ← sub_one_mul]
     exact mul_ne_zero (X_sub_C_ne_zero 1) X_ne_zero
@@ -199,9 +196,9 @@ lemma n_lt_m (h : X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ m + X - C 1) : n < m := by
   compute_degree!
 
 include hn in
-lemma m_n_eq (c₁ : m < 2 * n) (c₂ : n < m)
-    (h : X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ m + X - C 1) : m = 5 ∧ n = 3 := by
-  suffices X ^ n + X ^ 2 - C (1 : ℤ) = X ^ (m - n) * (X + 1) - C 1 by
+lemma m_n_eq (c₁ : m < 2 * n) (c₂ : n < m) (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) :
+    m = 5 ∧ n = 3 := by
+  suffices (X : ℤ[X]) ^ n + X ^ 2 - 1 = X ^ (m - n) * (X + 1) - 1 by
     rw [sub_left_inj, mul_add_one, ← pow_succ] at this
     have c₃ : n = m - n + 1 := by
       have deq := congr(natDegree $this)
@@ -216,11 +213,11 @@ lemma m_n_eq (c₁ : m < 2 * n) (c₂ : n < m)
     have deq := congr(natDegree $this)
     simp_rw [natDegree_X_pow] at deq
     lia
-  suffices X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ (m - n) * (X + C 1) - C 1 by
+  suffices (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ (m - n) * (X + C 1) - 1 by
     refine (eq_of_monic_of_dvd_of_natDegree_le (monic_denompol hn) ?_ this ?_).symm
     · apply Monic.sub_of_left
       · exact (monic_X_pow _).mul (monic_X_add_C _)
-      · rw [degree_C one_ne_zero, degree_mul, degree_X_pow, degree_X_add_C]
+      · rw [degree_one, degree_mul, degree_X_pow, degree_X_add_C]
         norm_cast
         lia
     · rw [natDegree_sub_eq_left_of_natDegree_lt]
@@ -231,23 +228,20 @@ lemma m_n_eq (c₁ : m < 2 * n) (c₂ : n < m)
             lia
           · simp_rw [natDegree_X_pow]
             lia
-        · rw [natDegree_C, natDegree_add_eq_left_of_natDegree_lt]
+        · rw [natDegree_one, natDegree_add_eq_left_of_natDegree_lt]
           · rw [natDegree_X_pow]
             lia
           · simp_rw [natDegree_X_pow]
             lia
-      · rw [natDegree_C, natDegree_mul (by simp) (X_add_C_ne_zero 1), natDegree_X_pow,
+      · rw [natDegree_one, natDegree_mul (by simp) (X_add_C_ne_zero 1), natDegree_X_pow,
           natDegree_X_add_C]
         lia
-  suffices X ^ n + X ^ 2 - C (1 : ℤ) ∣ X ^ n * (X ^ (m - n) * (X + C 1) - C 1) by
-    refine IsRelPrime.dvd_of_dvd_mul_left (IsRelPrime.pow_right ?_) this
+  suffices (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ n * (X ^ (m - n) * (X + 1) - 1) by
+    refine (IsRelPrime.pow_right ?_).dvd_of_dvd_mul_left this
     rw [← Nat.sub_one_add_one (show n ≠ 0 by lia), pow_succ, sq, ← add_mul, sub_eq_add_neg]
-    refine (IsRelPrime.neg_left ?_).mul_add_right_left _
-    rw [C_1]
-    exact isRelPrime_one_left
-  rw [C_1, mul_sub_one, ← mul_assoc, ← pow_add, show n + (m - n) = m by lia, ← dvd_add_self_right,
-    show X ^ m * (X + (1 : Polynomial ℤ)) - X ^ n + (X ^ n + X ^ 2 - 1) =
-    (X ^ m + X - 1) * (X + 1) by ring]
+    exact isRelPrime_one_left.neg_left.mul_add_right_left _
+  rw [mul_sub_one, ← mul_assoc, ← pow_add, Nat.add_sub_of_le c₂.le, ← dvd_add_self_right,
+    show (X : ℤ[X]) ^ m * (X + 1) - X ^ n + (X ^ n + X ^ 2 - 1) = (X ^ m + X - 1) * (X + 1) by ring]
   exact h.mul_right _
 
 include hm hn in
