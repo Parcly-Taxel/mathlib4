@@ -220,7 +220,7 @@ theorem isBigO_of_degree_le (h : P.degree ≤ Q.degree) :
 
 section Cobounded
 
-lemma eventually_cofinite_no_roots {R : Type*} [CommRing R] [IsDomain R] {P : R[X]} (hP : P ≠ 0) :
+lemma eventually_cofinite_not_isRoot {R : Type*} [CommRing R] [IsDomain R] {P : R[X]} (hP : P ≠ 0) :
     ∀ᶠ x in cofinite, ¬P.IsRoot x :=
   (finite_setOf_isRoot hP).compl_mem_cofinite
 
@@ -263,7 +263,7 @@ lemma finite_abs_eval_lt_of_degree_lt {P Q : ℤ[X]} (h : Q.degree < P.degree) :
     {x | |P.eval x| ≤ |Q.eval x|}.Finite := by
   have o := isLittleO_cobounded_of_degree_lt h
   rw [Int.cobounded_eq, ← Int.cofinite_eq] at o
-  have nr := eventually_cofinite_no_roots (ne_zero_of_degree_gt h)
+  have nr := eventually_cofinite_not_isRoot (ne_zero_of_degree_gt h)
   have key := o.eventuallyLT_norm_of_eventually_pos (nr.congr (.of_forall (by simp)))
   simp_rw [eventually_cofinite, not_lt, Int.norm_eq_abs] at key
   norm_cast at key
