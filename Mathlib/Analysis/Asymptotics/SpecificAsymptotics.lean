@@ -36,6 +36,31 @@ theorem Filter.IsBoundedUnder.isLittleO_sub_self_inv {𝕜 E : Type*} [NormedFie
 
 end NormedField
 
+section NormedRing
+
+open Bornology in
+theorem Asymptotics.isLittleO_pow_pow_cobounded_of_lt
+    {R : Type*} [NormedRing R] [NormMulClass R] {p q : ℕ} (hpq : p < q) :
+    (fun x ↦ x ^ p) =o[cobounded R] fun x ↦ x ^ q := by
+  nontriviality R
+  have noc : NormOneClass R := NormMulClass.toNormOneClass
+  refine isLittleO_iff_nat_mul_le.mpr fun n ↦ ?_
+  rw [← (Nat.sub_add_cancel hpq.le)]
+  simp_rw [pow_add, norm_mul, norm_pow, eventually_iff_exists_mem]
+  refine ⟨{y | n ≤ ‖y‖ ^ (q - p)}, ?_, fun y my ↦ ?_⟩
+  · rw [← isCobounded_def, ← isBounded_compl_iff, Set.compl_setOf, isBounded_iff_forall_norm_le]
+    refine ⟨n, fun a (ma : ¬_ ≤ _) ↦ ?_⟩
+    contrapose! ma
+    rcases le_or_gt ‖a‖ 1 with ha | ha
+    · replace ma := ma.trans_le ha
+      rw [Nat.cast_lt_one] at ma
+      simp [ma]
+    · exact ma.le.trans (le_self_pow₀ ha.le (Nat.sub_ne_zero_iff_lt.mpr hpq))
+  · gcongr
+    exact my
+
+end NormedRing
+
 section LinearOrderedField
 
 variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
