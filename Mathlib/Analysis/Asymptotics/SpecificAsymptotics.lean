@@ -38,9 +38,11 @@ end NormedField
 
 section NormedRing
 
-open Bornology in
-theorem Asymptotics.isLittleO_pow_pow_cobounded_of_lt
-    {R : Type*} [NormedRing R] [NormMulClass R] {p q : ℕ} (hpq : p < q) :
+variable {R : Type*} [NormedRing R] [NormMulClass R] {p q : ℕ}
+
+open Bornology
+
+theorem Asymptotics.isLittleO_pow_pow_cobounded_of_lt (hpq : p < q) :
     (fun x ↦ x ^ p) =o[cobounded R] fun x ↦ x ^ q := by
   nontriviality R
   have noc : NormOneClass R := NormMulClass.toNormOneClass
@@ -58,6 +60,12 @@ theorem Asymptotics.isLittleO_pow_pow_cobounded_of_lt
     · exact ma.le.trans (le_self_pow₀ ha.le (Nat.sub_ne_zero_iff_lt.mpr hpq))
   · gcongr
     exact my
+
+theorem Asymptotics.isBigO_pow_pow_cobounded_of_le (hpq : p ≤ q) :
+    (fun x ↦ x ^ p) =O[cobounded R] fun x ↦ x ^ q := by
+  rcases hpq.eq_or_lt with rfl | h
+  · exact isBigO_refl ..
+  · exact (isLittleO_pow_pow_cobounded_of_lt h).isBigO
 
 end NormedRing
 
