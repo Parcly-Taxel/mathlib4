@@ -15,20 +15,16 @@ positive integers $a$ such that $(a^m+a-1) / (a^n+a^2-1)$ is itself an integer.
 # Solution
 
 It suffices to find $(m,n)$ pairs for which $a^n+a^2-1 ∣ a^m+a-1$, where both sides are viewed as
-polynomials in $a$. Given the bounds on $m$ and $n$, there exists a real root $0 < r < 1$ of
-$a^n+a^2-1$, whence $r^n+r^2 = r^m+r = 1$. If $2n ≤ m$ we have
-$$1-r = r^m ≤ (r^n)^2 = (1-r^2)^2$$
-$$0 ≤ r(r-1)(r^2+r-1)$$
-but this is impossible because $r-1 < 0$ and $r^2+r-1 > r^m+r-1 = 0$.
-Thus $m < 2n$, and from the polynomial divisibility condition we clearly have $n < m$.
+polynomials in $a$. This automatically gives $m ≤ n$, so we have
+$$a^n+a^2-1 ∣ (a^m+a-1)(a+1) - (a^n+a^2-1) = a^m(a+1) - a^n.$$
+Since $a^n$ is coprime to $a^n+a^2-1$ we have $a^n+a^2-1 ∣ a^{m-n}(a+1)-1$, so $m-n+1 ≥ n$.
 
-From the same condition we also have
-$$a^n+a^2-1 ∣ (a^m+a-1)(a+1) + (a^n+a^2-1) = a^m(a+1) - a^n.$$
-Since $a^n$ is coprime to $a^n+a^2-1$ we have
-$$a^n+a^2-1 ∣ a^{m-n}(a+1)-1.$$
-The dividend's degree is $m-n+1$, which must be at least $n$ by degree considerations and
-at most $n$ by $m < 2n$. So $m = 2n-1$, and comparing coefficients gives $m = 5, n = 3$
-as the only solution.
+Given the bounds on $m$ and $n$, there exists a real root $0 < r < 1$ of
+$a^n+a^2-1$, whence $r^{m-n+1}+r^{m-n}-1 = 0$. But we cannot have $m-n+1 ≥ n$ and $m-n > 2$
+at the same time, for then we would have
+$$r^{m-n+1}+r^{m-n}-1 ≤ r^n+r^{m-n}-1 < r^n+r^2-1 = 0.$$
+This is sufficient to eliminate all possibilities except $m = 5, n = 3$, which is easily seen
+to satisfy the original condition.
 -/
 
 open Polynomial
@@ -38,11 +34,11 @@ namespace Imo2002Q3
 variable {m n : ℕ} (hm : 3 ≤ m) (hn : 3 ≤ n)
 
 include hm in
-lemma natDegree_numerpol : ((X : ℤ[X]) ^ m + X - 1).natDegree = m := by
+lemma natDegree_numerpol : (X ^ m + X - 1 : ℤ[X]).natDegree = m := by
   compute_degree <;> grind
 
 include hm in
-lemma monic_numerpol : ((X : ℤ[X]) ^ m + X - 1).Monic := by
+lemma monic_numerpol : (X ^ m + X - 1 : ℤ[X]).Monic := by
   apply Monic.sub_of_left
   · apply monic_X_pow_add
     rw [degree_X, Nat.one_lt_cast]
@@ -54,11 +50,11 @@ lemma monic_numerpol : ((X : ℤ[X]) ^ m + X - 1).Monic := by
       lia
 
 include hn in
-lemma natDegree_denompol : ((X : ℤ[X]) ^ n + X ^ 2 - 1).natDegree = n := by
+lemma natDegree_denompol : (X ^ n + X ^ 2 - 1 : ℤ[X]).natDegree = n := by
   compute_degree <;> grind
 
 include hn in
-lemma monic_denompol : ((X : ℤ[X]) ^ n + X ^ 2 - 1).Monic := by
+lemma monic_denompol : (X ^ n + X ^ 2 - 1 : ℤ[X]).Monic := by
   apply Monic.sub_of_left
   · apply monic_X_pow_add
     rw [degree_X_pow, Nat.cast_lt]
@@ -69,141 +65,55 @@ lemma monic_denompol : ((X : ℤ[X]) ^ n + X ^ 2 - 1).Monic := by
     · simp_rw [degree_X_pow, Nat.cast_lt]
       lia
 
-include hn in
-/-- The given condition implies `x ^ n + x ^ 2 - 1 ∣ x ^ m + x - 1` as polynomials. -/
-lemma dvd_of_hyp (h : {a : ℤ | 0 < a ∧ a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1}.Infinite) :
-    (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1 :=
-  dvd_of_infinite_eval_dvd_eval (monic_denompol hn) (h.mono (by simp))
-
-include hn in
-lemma exists_root_denompol :
-    ∃ r ∈ Set.Ioo (0 : ℝ) 1, (((X : ℤ[X]) ^ n + X ^ 2 - 1).map (Int.castRingHom ℝ)).eval r = 0 := by
-  simp only [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_pow, map_X, Polynomial.map_one,
-    eval_sub, eval_add, eval_pow, eval_X, eval_one]
-  let f (r : ℝ) := r ^ n + r ^ 2 - 1
-  have cf : ContinuousOn f (Set.Icc 0 1) := by fun_prop
-  have ivt := intermediate_value_Ioo zero_le_one cf
-  simp only [ne_eq, show n ≠ 0 by lia, not_false_eq_true, zero_pow, OfNat.ofNat_ne_zero, add_zero,
-    zero_sub, one_pow, add_sub_cancel_right, f] at ivt
-  simpa [Set.mem_image] using ivt (by simp)
-
-/-- A root of `x ^ n + x ^ 2 - 1` obtained from `exists_root_denompol`. -/
-noncomputable def r₀ : ℝ :=
-  (exists_root_denompol hn).choose
-
-lemma r₀_spec : r₀ hn ∈ Set.Ioo (0 : ℝ) 1 ∧
-    (((X : ℤ[X]) ^ n + X ^ 2 - 1).map (Int.castRingHom ℝ)).IsRoot (r₀ hn) :=
-  (exists_root_denompol hn).choose_spec
-
-lemma r₀_spec' (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) :
-    (((X : ℤ[X]) ^ m + X - 1).map (Int.castRingHom ℝ)).IsRoot (r₀ hn) := by
-  rw [← map_dvd_map _ (Int.castRingHom ℝ).injective_int (monic_denompol hn)] at h
-  exact (r₀_spec hn).2.dvd h
-
-include hn in
-lemma m_lt_twice_n (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) : m < 2 * n := by
-  by_contra! hm
-  obtain ⟨rb, rpoln⟩ := r₀_spec hn
-  have rpolm := r₀_spec' hn h
-  set r := r₀ hn
-  simp only [Polynomial.map_sub, Polynomial.map_add, Polynomial.map_pow, map_X, Polynomial.map_one,
-    IsRoot.def, eval_sub, eval_add, eval_pow, eval_X, Set.mem_Ioo, eval_one] at rpolm rpoln rb
-  have key : 1 - r ≤ (1 - r ^ 2) ^ 2 := by
-    calc
-      _ = r ^ m := by linarith only [rpolm]
-      _ ≤ (r ^ n) ^ 2 := by
-        rw [← pow_mul, mul_comm]
-        exact pow_le_pow_of_le_one rb.1.le rb.2.le hm
-      _ = _ := by
-        congr 1
-        linarith only [rpoln]
-  replace key : 0 ≤ r * (r - 1) * (r ^ 2 + r - 1) := by linarith
-  apply absurd key
-  rw [not_le]
-  apply mul_neg_of_neg_of_pos (by nlinarith only [rb])
-  rw [← rpolm]
-  gcongr ?_ + _ - _
-  exact pow_lt_pow_right_of_lt_one₀ rb.1 rb.2 (by lia)
-
 include hm hn in
-lemma n_lt_m (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) : n < m := by
-  have nlem := natDegree_le_of_dvd h (monic_numerpol hm).ne_zero
-  rw [natDegree_numerpol hm, natDegree_denompol hn] at nlem
-  apply lt_of_le_of_ne nlem
-  by_contra h'
-  subst h'
-  rw [← dvd_sub_self_left,
-    show (X : ℤ[X]) ^ n + X ^ 2 - 1 - (X ^ n + X - 1) = X ^ 2 - X by ring] at h
-  have subn0 : X ^ 2 - X ≠ (0 : Polynomial ℤ) := by
-    rw [sq, ← sub_one_mul]
-    exact mul_ne_zero (X_sub_C_ne_zero 1) X_ne_zero
-  have hn' := natDegree_le_of_dvd h subn0
-  suffices (X ^ 2 - X : Polynomial ℤ).natDegree = 2 by
-    rw [natDegree_denompol hn] at hn'
-    lia
-  compute_degree!
-
-include hn in
-lemma m_n_eq (c₁ : m < 2 * n) (c₂ : n < m) (h : (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1) :
+lemma proof_body (h : {a : ℤ | 0 < a ∧ a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1}.Infinite) :
     m = 5 ∧ n = 3 := by
-  suffices (X : ℤ[X]) ^ n + X ^ 2 - 1 = X ^ (m - n) * (X + 1) - 1 by
-    rw [sub_left_inj, mul_add_one, ← pow_succ] at this
-    have c₃ : n = m - n + 1 := by
-      have deq := congr(natDegree $this)
-      rw [natDegree_add_eq_left_of_degree_lt] at deq
-      · rw [natDegree_add_eq_left_of_degree_lt] at deq
-        · simpa only [natDegree_X_pow] using deq
-        · simp_rw [degree_X_pow, Nat.cast_lt]
-          lia
-      · simp_rw [degree_X_pow, Nat.cast_lt]
-        lia
-    rw [← c₃, add_right_inj] at this
-    have deq := congr(natDegree $this)
-    simp_rw [natDegree_X_pow] at deq
-    lia
-  suffices (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ (m - n) * (X + C 1) - 1 by
-    refine (eq_of_monic_of_dvd_of_natDegree_le (monic_denompol hn) ?_ this ?_).symm
-    · apply Monic.sub_of_left
-      · exact (monic_X_pow _).mul (monic_X_add_C _)
-      · rw [degree_one, degree_mul, degree_X_pow, degree_X_add_C]
-        norm_cast
-        lia
-    · rw [natDegree_sub_eq_left_of_natDegree_lt]
-      · rw [natDegree_mul (by simp) (X_add_C_ne_zero 1), natDegree_X_pow, natDegree_X_add_C,
-          natDegree_sub_eq_left_of_natDegree_lt]
-        · rw [natDegree_add_eq_left_of_natDegree_lt]
-          · rw [natDegree_X_pow]
-            lia
-          · simp_rw [natDegree_X_pow]
-            lia
-        · rw [natDegree_one, natDegree_add_eq_left_of_natDegree_lt]
-          · rw [natDegree_X_pow]
-            lia
-          · simp_rw [natDegree_X_pow]
-            lia
-      · rw [natDegree_one, natDegree_mul (by simp) (X_add_C_ne_zero 1), natDegree_X_pow,
-          natDegree_X_add_C]
-        lia
-  suffices (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ n * (X ^ (m - n) * (X + 1) - 1) by
-    refine (IsRelPrime.pow_right ?_).dvd_of_dvd_mul_left this
-    rw [← Nat.sub_one_add_one (show n ≠ 0 by lia), pow_succ, sq, ← add_mul, sub_eq_add_neg]
-    exact isRelPrime_one_left.neg_left.mul_add_right_left _
-  rw [mul_sub_one, ← mul_assoc, ← pow_add, Nat.add_sub_of_le c₂.le, ← dvd_add_self_right,
-    show (X : ℤ[X]) ^ m * (X + 1) - X ^ n + (X ^ n + X ^ 2 - 1) = (X ^ m + X - 1) * (X + 1) by ring]
-  exact h.mul_right _
+  replace h : (X ^ n + X ^ 2 - 1 : ℤ[X]) ∣ X ^ m + X - 1 :=
+    dvd_of_infinite_eval_dvd_eval (monic_denompol hn) (h.mono (by simp))
+  -- Algebraic part: `n ≤ m - n + 1`
+  have db := natDegree_le_of_dvd h (monic_numerpol hm).ne_zero
+  rw [natDegree_numerpol hm, natDegree_denompol hn] at db
+  replace h := dvd_sub_self_right.mpr (dvd_mul_of_dvd_left h (X + 1))
+  have rearr : ((X ^ m + X - 1) * (X + 1) - (X ^ n + X ^ 2 - 1) : ℤ[X]) =
+      X ^ n * (X ^ (m - n + 1) + X ^ (m - n) - 1) := by
+    nth_rw 1 [← Nat.sub_add_cancel db]
+    ring
+  rw [rearr] at h
+  replace h : (X ^ n + X ^ 2 - 1 : ℤ[X]) ∣ X ^ (m - n + 1) + X ^ (m - n) - 1 := by
+    refine (IsRelPrime.pow_right ?_).dvd_of_dvd_mul_left h
+    nth_rw 1 [isRelPrime_comm, irreducible_X.isRelPrime_iff_not_dvd,
+      show (X : ℤ[X]) = X - C 0 by simp, dvd_iff_isRoot]
+    simp [show n ≠ 0 by lia]
+  have de : (X ^ (m - n + 1) + X ^ (m - n) - 1 : ℤ[X]).natDegree = m - n + 1 := by
+    compute_degree <;> lia
+  have db₂ := natDegree_le_of_dvd h (ne_zero_of_natDegree_gt (n := 0) (by lia))
+  rw [natDegree_denompol hn, de] at db₂
+  -- Analytic part: given the above, `m - n ≤ 2`
+  suffices m - n ≤ 2 by lia
+  let hom := Int.castRingHom ℝ
+  obtain ⟨r, br, hr⟩ : ∃ r ∈ Set.Ioo 0 1, (X ^ n + X ^ 2 - 1 : ℤ[X]).eval₂ hom r = 0 := by
+    simp only [eval₂_sub, eval₂_add, eval₂_X_pow, eval₂_one]
+    let f (r : ℝ) := r ^ n + r ^ 2 - 1
+    have cf : ContinuousOn f (Set.Icc 0 1) := by fun_prop
+    have ivt := intermediate_value_Ioo zero_le_one cf
+    have f0 : f 0 = -1 := by simp [f]; lia
+    have f1 : f 1 = 1 := by simp [f]
+    rw [f0, f1] at ivt
+    simpa using ivt (by simp)
+  have hr₂ := eval₂_dvd hom r h
+  simp only [eval₂_sub, eval₂_add, eval₂_X_pow, eval₂_one] at hr hr₂
+  rw [hr, zero_dvd_iff, ← hr, sub_left_inj] at hr₂
+  rw [← pow_le_pow_iff_right_of_lt_one₀ br.1 br.2] at db₂
+  have fin : r ^ 2 ≤ r ^ (m - n) := by linarith
+  rwa [pow_le_pow_iff_right_of_lt_one₀ br.1 br.2] at fin
 
 include hm hn in
 theorem result : {a : ℤ | 0 < a ∧ a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1}.Infinite ↔ m = 5 ∧ n = 3 := by
-  constructor <;> intro h
-  · replace h := dvd_of_hyp hn h
-    have c₁ := m_lt_twice_n hn h
-    have c₂ := n_lt_m hm hn h
-    exact m_n_eq hn c₁ c₂ h
-  · rw [h.1, h.2]
-    conv =>
-      enter [1, 1, a]
-      rw [show a ^ 5 + a - 1 = (a ^ 2 - a + 1) * (a ^ 3 + a ^ 2 - 1) by ring]
-    simp only [dvd_mul_left, and_true]
-    exact Set.Ioi_infinite _
+  refine ⟨proof_body hm hn, fun h ↦ ?_⟩
+  rw [h.1, h.2]
+  conv =>
+    enter [1, 1, a]
+    rw [show a ^ 5 + a - 1 = (a ^ 2 - a + 1) * (a ^ 3 + a ^ 2 - 1) by ring]
+  simpa using Set.Ioi_infinite 0
 
 end Imo2002Q3
