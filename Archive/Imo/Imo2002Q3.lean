@@ -19,12 +19,11 @@ polynomials in $a$. This automatically gives $m ≤ n$, so we have
 $$a^n+a^2-1 ∣ (a^m+a-1)(a+1) - (a^n+a^2-1) = a^m(a+1) - a^n.$$
 Since $a^n$ is coprime to $a^n+a^2-1$ we have $a^n+a^2-1 ∣ a^{m-n}(a+1)-1$, so $m-n+1 ≥ n$.
 
-Given the bounds on $m$ and $n$, there exists a real root $0 < r < 1$ of
-$a^n+a^2-1$, whence $r^{m-n+1}+r^{m-n}-1 = 0$. But we cannot have $m-n+1 ≥ n$ and $m-n > 2$
-at the same time, for then we would have
+Because $n ≥ 3$, there exists a real root $0 < r < 1$ of $a^n+a^2-1$,
+whence $r^{m-n+1}+r^{m-n}-1 = 0$. But we must also have $m-n ≤ 2$, for otherwise
 $$r^{m-n+1}+r^{m-n}-1 ≤ r^n+r^{m-n}-1 < r^n+r^2-1 = 0.$$
-This is sufficient to eliminate all possibilities except $m = 5, n = 3$, which is easily seen
-to satisfy the original condition.
+This eliminates all possibilities except $m = 5, n = 3$,
+which is easily seen to satisfy the original condition.
 -/
 
 open Polynomial
