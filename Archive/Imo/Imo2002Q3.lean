@@ -72,60 +72,8 @@ lemma monic_denompol : ((X : ℤ[X]) ^ n + X ^ 2 - 1).Monic := by
 include hn in
 /-- The given condition implies `x ^ n + x ^ 2 - 1 ∣ x ^ m + x - 1` as polynomials. -/
 lemma dvd_of_hyp (h : {a : ℤ | 0 < a ∧ a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1}.Infinite) :
-    (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1 := by
-  set F := (X : ℤ[X]) ^ m + X - 1
-  set G := (X : ℤ[X]) ^ n + X ^ 2 - 1
-  have monG : G.Monic := monic_denompol hn
-  rw [← modByMonic_eq_zero_iff_dvd monG]
-  contrapose! h
-  suffices ∃ Z : ℤ, ∀ a > 0, a ^ n + a ^ 2 - 1 ∣ a ^ m + a - 1 → a ≤ Z by
-    obtain ⟨Z, hZ⟩ := this
-    refine (Finset.Ioc 0 Z).finite_toSet.subset fun a ma ↦ ?_
-    rw [Finset.coe_Ioc, Set.mem_Ioc]
-    exact ⟨ma.1, hZ _ ma.1 ma.2⟩
-  let IR := Int.castRingHom ℝ
-  have tto : ((F %ₘ G).map IR).degree < (G.map IR).degree := by
-    simp_rw [degree_map_eq_of_injective IR.injective_int]
-    exact degree_modByMonic_lt F monG
-  have mapGne0 : G.map IR ≠ 0 := ne_zero_of_degree_gt tto
-  have mapRne0 : (F %ₘ G).map IR ≠ 0 := by rwa [Polynomial.map_ne_zero_iff IR.injective_int]
-  rw [← div_tendsto_zero_iff_degree_lt _ _ mapGne0, Metric.tendsto_atTop] at tto
-  specialize tto 1 zero_lt_one
-  obtain ⟨Z₁, hZ₁⟩ := tto
-  have enrG := eventually_no_roots _ mapGne0
-  rw [Filter.eventually_atTop] at enrG
-  obtain ⟨Z₂, hZ₂⟩ := enrG
-  simp_rw [IsRoot.def] at hZ₂
-  have enrR := eventually_no_roots _ mapRne0
-  rw [Filter.eventually_atTop] at enrR
-  obtain ⟨Z₃, hZ₃⟩ := enrR
-  simp_rw [IsRoot.def] at hZ₃
-  refine ⟨⌈max Z₁ (max Z₂ Z₃)⌉, fun a apos da ↦ ?_⟩
-  by_contra! ca
-  rw [← Int.cast_lt (R := ℝ)] at ca
-  replace ca := (Int.le_ceil _).trans ca.le
-  have lZ₁ : Z₁ ≤ a := (le_max_left ..).trans ca
-  specialize hZ₁ _ lZ₁
-  have lZ₂ : Z₂ ≤ a := ((le_max_left ..).trans (le_max_right ..)).trans ca
-  specialize hZ₂ _ lZ₂
-  have lZ₃ : Z₃ ≤ a := ((le_max_right ..).trans (le_max_right ..)).trans ca
-  specialize hZ₃ _ lZ₃
-  simp_rw [eval_intCast_map, Int.cast_eq, eq_intCast, ← ne_eq] at hZ₁ hZ₂ hZ₃
-  have key : (((a ^ m + a - 1) / (a ^ n + a ^ 2 - 1) : ℤ) : ℝ) =
-      (F /ₘ G).eval a + (F %ₘ G).eval a / G.eval a := by
-    calc
-      _ = ((a ^ m + a - 1 : ℤ) : ℝ) / (a ^ n + a ^ 2 - 1 : ℤ) := Int.cast_div_charZero da
-      _ = (G * (F /ₘ G) + F %ₘ G).eval a / G.eval a := by
-        rw [add_comm _ (F %ₘ G), modByMonic_add_div F monG]
-        simp [F, G]
-      _ = _ := by
-        rw [eval_add, eval_mul, Int.cast_add, Int.cast_mul, add_div, mul_div_cancel_left₀ _ hZ₂]
-  rw [← sub_eq_iff_eq_add', ← Int.cast_sub] at key
-  rw [← key, dist_zero_right, Real.norm_eq_abs] at hZ₁
-  norm_cast at hZ₁
-  rw [Int.abs_lt_one_iff] at hZ₁
-  rw [hZ₁, Int.cast_zero] at key
-  exact (div_ne_zero hZ₃ hZ₂).symm key
+    (X : ℤ[X]) ^ n + X ^ 2 - 1 ∣ X ^ m + X - 1 :=
+  dvd_of_infinite_eval_dvd_eval (monic_denompol hn) (h.mono (by simp))
 
 include hn in
 lemma exists_root_denompol :
