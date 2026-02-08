@@ -31,7 +31,7 @@ still yielded an algebra equivalent to Boolean algebra. This came to be known as
 under the direction of William McCune.
 
 The formalisation in this file largely follows Matthew Wampler-Doty's [Isabelle formalisation](https://www.isa-afp.org/entries/Robbins-Conjecture.html),
-which in turn follows Allen L. Mann's "A Complete Proof of the Robbins Conjecture".
+which in turn follows Allen L. Mann's [A Complete Proof of the Robbins Conjecture](https://math.colgate.edu/~amann/MA/robbins_complete.pdf).
 Some differences include:
 * For ease of typing and clarity around negations, algebraic notation is used
   for the newly defined algebras: `- + * 0 1` instead of `ᶜ ⊔ ⊓ ⊥ ⊤`.
@@ -395,86 +395,72 @@ lemma mann_49 :
   rw [mann_48 a b c]
   ac_rfl
 
-lemma mann_50 :
-    -(-(-(-(3 • a) + a) + -(3 • a)) + -(-(-(3 • a) + a) + 5 • a)) = -(-(3 • a) + a) := by
-  set q := -(-(3 • a) + a)
-  have k₁ := mann_44 (3 • a) (q + 2 • a)
-  have rearr₁ : 3 • a + (q + 2 • a) = q + 5 • a := by
+/-- A common subexpression occurring in `mann_50` to `winker`. -/
+def q : α := -(-(3 • a) + a)
+
+lemma mann_50 : -(-(q a + -(3 • a)) + -(q a + 5 • a)) = q a := by
+  have k₁ := mann_44 (3 • a) (q a + 2 • a)
+  have rearr₁ : -(-(3 • a + (q a + 2 • a)) + -(3 • a) + (q a + 2 • a)) + (q a + 2 • a) =
+      -(-(q a + 5 • a) + -(3 • a) + (q a + 2 • a)) + 2 • a + q a := by
     rw [smul2, smul3, smul5]
     ac_rfl
   rw [rearr₁] at k₁
-  have k₂ :=
-    mann_49 (3 • a) a (2 • a) q
-  have rearr₂ : (-(q + 3 • a + a + a) + q + -(a + 2 • a) + 2 • a) =
-      -(q + 5 • a) + -(3 • a) + (q + 2 • a) := by
-    rw [← add_assoc]
+  have k₂ : -(-(-(-(q a + 3 • a + a + a) + q a + -(a + 2 • a) + 2 • a) + 2 • a + q a) +
+      -(-(a + 2 • a) + q a)) = q a := mann_49 (3 • a) a (2 • a) (q a)
+  have rearr₂ : (-(q a + 3 • a + a + a) + q a + -(a + 2 • a) + 2 • a) =
+      -(q a + 5 • a) + -(3 • a) + (q a + 2 • a) := by
+    simp_rw [smul2, smul3, smul5, ← add_assoc]
+    congr 2
+    simp_rw [add_assoc]
     congr 1
-    rw [add_assoc, add_assoc _ _ q]
-    congr 1
-    · rw [smul3, smul5]
-      ac_rfl
-    · rw [smul2, smul3]
-      ac_rfl
-  rw [rearr₂] at k₂
-  conv_lhs at k₂ =>
-    enter [1, 1]
-    rw [add_assoc]
-    enter [1, 2]
     rw [add_comm]
-  rw [k₁] at k₂
-  conv_rhs => rw [← k₂]
+  rw [rearr₂, k₁] at k₂
+  convert k₂ using 2
   rw [smul2, smul3, smul5]
   ac_rfl
 
-lemma mann_51 : -(-(-(3 • a) + a) + 5 • a) = -(3 • a) := by
-  set q := -(-(3 • a) + a)
-  have k₁ := robbins (-(q + 5 • a)) (q + -(3 • a))
-  have k₂ : -(-(q + -(3 • a)) + -(q + 5 • a)) = q := mann_50 a
-  conv_lhs at k₁ =>
-    enter [1, 2]
-    rw [add_comm, k₂]
-  conv_lhs => rw [← k₁]
-  conv_rhs => rw [← mann_47 (3 • a) a (-(3 • a))]
-  simp_rw [q, smul3, smul5]
-  ac_rfl
+lemma mann_51 : -(q a + 5 • a) = -(3 • a) := by
+  have k₁ := robbins (-(q a + 5 • a)) (q a + -(3 • a))
+  have k₂ : -(-(q a + -(3 • a)) + -(q a + 5 • a)) = q a := mann_50 a
+  have k₃ : -(-(-(q a + 3 • a + a + a) + q a + -(3 • a)) + q a) = -(3 • a) := by
+    convert mann_47 (3 • a) a (-(3 • a)) using 3
+    rw [q, add_comm]
+  rw [← k₃, ← k₁, ← add_comm (-(q a + _)), k₂]
+  simp_rw [smul3, smul5, ← add_assoc]
 
-lemma mann_52 : -(-(-(-(3 • a) + a) + -(3 • a) + 2 • a) + -(3 • a)) = -(-(3 • a) + a) + 2 • a := by
-  set q := -(-(3 • a) + a)
-  have key := robbins (q + 2 • a) (3 • a)
-  have rearr : q + 2 • a + 3 • a = q + 5 • a := by
+lemma mann_52 : -(-(q a + -(3 • a) + 2 • a) + -(3 • a)) = q a + 2 • a := by
+  have key := robbins (q a + 2 • a) (3 • a)
+  have rearr : q a + 2 • a + 3 • a = q a + 5 • a := by
     rw [smul2, smul3, smul5]
     ac_rfl
   rw [← key, rearr, mann_51]
   ac_rfl
 
-lemma mann_53 : -(-(-(3 • a) + a) + -(3 • a)) = a := by
-  set q := -(-(3 • a) + a)
-  have k₁ := robbins a (q + 4 • a)
-  have rearr : a + (q + 4 • a) = q + 5 • a := by
+lemma mann_53 : -(q a + -(3 • a)) = a := by
+  have k₁ := robbins a (q a + 4 • a)
+  have rearr : a + (q a + 4 • a) = q a + 5 • a := by
     rw [smul4, smul5]
     ac_rfl
   rw [rearr, mann_51] at k₁
-  have k₂ : -(-(q + 3 • a + a) + a) = q := mann_45 (3 • a) a
-  have rearr₂ : -(q + 3 • a + a) + a = a + -(q + 4 • a) := by
+  have k₂ : -(-(q a + 3 • a + a) + a) = q a := mann_45 (3 • a) a
+  have rearr₂ : -(q a + 3 • a + a) + a = a + -(q a + 4 • a) := by
     rw [smul3, smul4]
     ac_rfl
   rw [rearr₂] at k₂
   rw [k₂] at k₁
   rwa [add_comm]
 
-lemma mann_54 : -(-(-(-(3 • a) + a) + -(3 • a) + b) + -(a + b)) = b := by
-  set w := -(-(3 • a) + a) + -(3 • a)
-  conv_rhs => rw [← robbins b w, mann_53]
+lemma mann_54 : -(-(q a + -(3 • a) + b) + -(a + b)) = b := by
+  conv_rhs => rw [← robbins b (q a + -(3 • a)), mann_53]
   ac_rfl
 
 /-- **Winker's first condition**,
 proved in 1997 by the automated theorem prover EQP to be derivable in Robbins algebras. -/
 theorem winker : ∃ x y : α, x + y = y := by
-  refine ⟨-(-(3 • default) + default), 2 • default, ?_⟩
+  refine ⟨q default, 2 • default, ?_⟩
   conv_lhs => rw [← mann_52]
   conv_rhs => rw [← mann_54 default (2 • default)]
-  rw [smul2, smul3]
-  ac_rfl
+  simp_rw [smul2, smul3, ← add_assoc]
 
 section Idempotence
 
