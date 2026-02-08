@@ -361,11 +361,6 @@ lemma smul_succ {k : ℕ} {a : α} (hk : 1 ≤ k) : (k + 1) • a = k • a + a 
   | base => rfl
   | succ k ih => rfl
 
-/-- Robbins's axiom as stated in Mann's paper. -/
-lemma robbins' : -(-(-a + b) + -(a + b)) = b := by
-  nth_rw 3 [← robbins b a]
-  ac_rfl
-
 lemma mann_44 : -(-(-(a + b) + -a + b) + b) = -(a + b) := by
   nth_rw 2 [← robbins (-(a + b)) (-a + b)]
   nth_rw 3 [← robbins b a]
