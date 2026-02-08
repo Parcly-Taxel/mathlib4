@@ -473,7 +473,7 @@ lemma mann_54 : -(-(-(-(3 • a) + a) + -(3 • a) + b) + -(a + b)) = b := by
   ac_rfl
 
 /-- **Winker's first condition**,
-proved in 1997 by McCune et al. to be derivable from the Robbins axioms. -/
+proved in 1997 by the automated theorem prover EQP to be derivable in Robbins algebras. -/
 theorem winker : ∃ x y : α, x + y = y := by
   refine ⟨-(-(3 • default) + default), 2 • default, ?_⟩
   conv_lhs => rw [← mann_52]
