@@ -53,10 +53,9 @@ theorem Asymptotics.isLittleO_pow_pow_cobounded_of_lt (hpq : p < q) :
   · have key : Tendsto (fun y ↦ ‖y‖ ^ (q - p)) (cobounded R) atTop :=
       (tendsto_pow_atTop (Nat.sub_ne_zero_iff_lt.mpr hpq)).comp tendsto_norm_cobounded_atTop
     rw [tendsto_atTop] at key
-    exact mem_map'.mp (key c⁻¹)
+    exact mem_map.mp (key c⁻¹)
   · rw [← inv_mul_le_iff₀ cpos]
-    gcongr
-    exact my
+    exact mul_le_mul_of_nonneg_right my (by positivity)
 
 theorem Asymptotics.isBigO_pow_pow_cobounded_of_le (hpq : p ≤ q) :
     (fun x ↦ x ^ p) =O[cobounded R] fun x ↦ x ^ q := by
